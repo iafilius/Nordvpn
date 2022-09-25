@@ -4,7 +4,7 @@
 
 - fixed some obvious small bugs in script to make it work for import
   - backup xz set permission error
-  - changed compare x witch xaff to x !=x$aff
+  - changed compare x with xaff to x !=x$aff
   - set download url to todays location
   - removed space in variable assignment
 - set default import location to the udpvpn definitions  dir
