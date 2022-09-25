@@ -60,7 +60,7 @@ nice_output(){
   #______________________________________________
 }
 
-
+# Warning, removes really all VPN, including non NordVpn ones....
 remove_all_vpn(){
   #remove all vpn utill any vpn conncetion is on a list
   while [[ $(nmcli con show | awk '$3=="vpn" {print "1"}' | wc -l) -gt 0  ]]; do
@@ -72,7 +72,8 @@ remove_all_vpn(){
 get_ovpn_files(){
   #get form network vpn-config files
 
-  url_config_f="aHR0cHM6Ly9ub3JkdnBuLmNvbS9hcGkvZmlsZXMvemlwCg=="
+  #url_config_f="aHR0cHM6Ly9ub3JkdnBuLmNvbS9hcGkvZmlsZXMvemlwCg=="
+  url_config_f="aHR0cHM6Ly9kb3dubG9hZHMubm9yZGNkbi5jb20vY29uZmlncy9hcmNoaXZlcy9zZXJ2ZXJzL292cG4uemlwCg=="
   wget $(echo "$url_config_f" | base64 -d) -O  $target
   if [ $? -eq 1 ]; then
     echo "I cant download ovpn files check internet connection"
@@ -86,14 +87,15 @@ get_ovpn_files(){
 
 backupnmcliconnections() {
   #create backup ncli connections
-  sudo tar -cvf ~/backupNMCLI-$sessionname.tar  $nmclisysttemconnections
+  sudo tar --xz -cvf ~/backupNMCLI-$sessionname.tar.xz  $nmclisysttemconnections
   if [ $? -eq 0 ]; then
-    echo "Backuped $nmclisysttemconnections  in home directory file : backupNMCLI-$sessionname.tar"
-    if hash xz 2>/dev/null;then
-      xz -9 ~/backupNMCLI-$sessionname.tar && echo "Compressed backup" &
-    else
-      echo "Nooooo xz consuela say nononono nono no  no packing "
-    fi
+    echo "Backuped $nmclisysttemconnections  in home directory file : backupNMCLI-$sessionname.tar.xz"
+# changed to use tar direcly  it due to set permission error
+#    if hash xz 2>/dev/null;then
+#      xz -9 ~/backupNMCLI-$sessionname.tar && echo "Compressed backup" &
+#    else
+#      echo "Nooooo xz consuela say nononono nono no  no packing "
+#    fi
   else
     echo "Na backuped "
   fi
@@ -201,11 +203,12 @@ start_loop1=`date +%s.%N`
 
   if [ $dxb -eq $dxa ];then echo -n -e "\n";dxb=0;else dbl[dxb]="$(echo "scale=3;$(date +%s.%N)-$start_loop1"| bc -l)";dxb=$(($dxb+1)); fi
     average_nmcli_loop=$(echo "scale=2;($(echo ${dbl[*]}| tr ' ' '+'))/${#dbl[*]}" | bc -l )
-CUUID2= `echo $SLINE | cut -d, -f1`
-CNAME2= `echo $SLINE | cut -d, -f2`
+CUUID2=$(echo $SLINE | cut -d, -f1)
+CNAME2=$(echo $SLINE | cut -d, -f2)
 
 nice_output $wnump $numfiles $start $average_nmcli_loop  "${dbl[*]}" $CNAME2
   nmcli  con mod $temp8 uuid `echo $SLINE | cut -d, -f1` connection.id `echo $SLINE | cut -d, -f2`  +vpn.data "username=$USERNAMEFORVPN" vpn.secrets password="$PASSWFORVPN"
+
 done < "$UUIDFILE"
 
 }
@@ -337,7 +340,9 @@ if [ "x" != "x$ag" ] ; then
   mkdir $target_1
   get_ovpn_files
   #go to diretory with ovpn config files
-  cd $target_1 2>/dev/null
+  #cd $target_1 2>/dev/null
+  cd $target_1/ovpn_udp 2>/dev/null
+
   echo $PWD
   #chek if -g patch is able to cd if not exit
   if [ $? -eq 1 ]; then
@@ -352,7 +357,7 @@ USERNAMEFORVPN=$au
 PASSWFORVPN=$ap
 a=""
 #ssign to vataible a all files *.vpn in directory
-if [ "x" != "xaff" ]; then
+if [ "x" != "x$aff" ]; then
   echo $aff
   for MER in $(echo $aff| sed 's/,/ /g'); do
     a+=$(ls $MER*.ovpn)
@@ -366,7 +371,7 @@ fi
 numfiles=$(echo $a |wc | awk '{print $2}')
 #check   if not len a eq 0
 if [[ "$numfiles" -eq 0 ]]; then
-  echo "Ovpn file in $PWD- do not found "
+  echo "Ovpn file in $PWD- do not found $numfiles"
   exit 1
 fi
 

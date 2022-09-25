@@ -1,6 +1,24 @@
 # Nordvpn
 
-Script for batch importing ovpn files from NordVPN .
+## Info regarding forked version by iafilius
+
+- fixed some obvious small bugs in script to make it work for import
+  - backup xz set permission error
+  - changed compare x witch xaff to x !=x$aff
+  - set download url to todays location
+  - removed space in variable assignment
+- set default import location to the udpvpn definitions  dir
+- beware of the cleanup/delete feature as it removes ALL of your VPN's (including non nordvpn)
+- nmcli might get overloaded, see journalctl -xe
+- Some site ID's have short name, while others full FQDN like, not sure why _yet_
+
+## General info
+
+- By importing all vpn sites, about 5000, the network manager on desktop gets extremely slow
+you probably just don't want that.
+
+## Script for batch importing ovpn files from NordVPN .
+
 ###Example
 Get Configuration files from current dir.
 
