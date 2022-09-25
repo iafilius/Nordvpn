@@ -15,7 +15,24 @@
 ## General info
 
 - By importing all vpn sites, about 5000, the network manager on desktop gets extremely slow
-you probably just don't want that.
+
+you probably just don't want that, possible solution:
+
+- so don't import that many connections
+- or watch what is the real source for slowness (journalctl -xe)
+ - If it is dbus you might want to tune it:
+```txt
+edit /etc/dbus-1//system.d/snap.network-manager.networkmanager.conf 
+from:
+<limit name="max_replies_per_connection">1024</limit>
+<limit name="max_match_rules_per_connection">2048</limit>
+
+To:
+<limit name="max_replies_per_connection">4096</limit>
+<limit name="max_match_rules_per_connection">8192</limit>
+
+```
+When having raised the limit to matching #connections, removing connections with nmcli works error free, the network manager gui is fast again
 
 ## Script for batch importing ovpn files from NordVPN .
 
